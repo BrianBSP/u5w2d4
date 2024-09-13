@@ -3,14 +3,17 @@ package brianpelinku.u5w2d4.authors;
 import brianpelinku.u5w2d4.exceptions.BadRequestException;
 import brianpelinku.u5w2d4.exceptions.NotFoundException;
 import brianpelinku.u5w2d4.payloads.NewAuthorDTO;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
+import java.io.IOException;
 
 @Service
 public class AuthorService {
@@ -18,6 +21,9 @@ public class AuthorService {
 
     @Autowired
     private AuthorRepository authorRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     // salviamo un nuovo autore nel DB
     public Author saveAuthor(NewAuthorDTO body) {
@@ -61,6 +67,14 @@ public class AuthorService {
         found.setDataDiNascita(updateAuthor.getDataDiNascita());
         found.setAvatar("https://ui-avatars.com/api/?name=" + updateAuthor.getNome() + "+" + updateAuthor.getCognome());
         return this.authorRepository.save(found);
+    }
+
+    public Author uploadImage(MultipartFile file, int authorId) throws IOException {
+        Author found = this.findById(authorId);
+        String url = (String) cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url");
+        System.out.println("URL: " + url);
+        found.setAvatar(url);
+       return this.authorRepository.save(found);
     }
 
 

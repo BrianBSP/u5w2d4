@@ -20,7 +20,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -74,5 +76,20 @@ public class AuthorController {
         authorService.findByIdAndDelete(authorId);
     }
 
+    // upload image
+
+    @PostMapping("/{authorId}/avatar")
+    public Author uploadAvatar(@RequestParam("avatar")MultipartFile img, @PathVariable int authorId) throws IOException {
+//        System.out.println(img.getName());
+
+        try {
+            return this.authorService.uploadImage(img, authorId);
+
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+
+
+    }
 
 }
