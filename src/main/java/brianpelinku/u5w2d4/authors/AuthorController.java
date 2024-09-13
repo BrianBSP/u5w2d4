@@ -11,10 +11,17 @@ package brianpelinku.u5w2d4.authors;
  * */
 
 
+import brianpelinku.u5w2d4.exceptions.BadRequestException;
+import brianpelinku.u5w2d4.payloads.NewAuthorDTO;
+import brianpelinku.u5w2d4.payloads.NewAuthorRespDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/authors")
@@ -37,11 +44,21 @@ public class AuthorController {
         return authorService.findById(authorId);
     }
 
-    // 3. Post: /users
+    // 3. Post: /users + body
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author createAuthor(@RequestBody Author bodyAuthor) {
-        return authorService.saveAuthor(bodyAuthor);
+    public NewAuthorRespDTO createAuthor(@RequestBody @Validated NewAuthorDTO bodyAuthor, BindingResult validationResult) {
+
+        if (validationResult.hasErrors()){
+            String messages = validationResult
+                    .getAllErrors()
+                    .stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.joining(". "));
+            throw new BadRequestException("Si sono verificati errori nel payload. " + messages);
+        } else {
+            return new NewAuthorRespDTO(this.authorService.saveAuthor(bodyAuthor).getId());
+        }
     }
 
     // 4. Put: /users/{userId}

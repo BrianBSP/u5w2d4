@@ -2,12 +2,15 @@ package brianpelinku.u5w2d4.authors;
 
 import brianpelinku.u5w2d4.exceptions.BadRequestException;
 import brianpelinku.u5w2d4.exceptions.NotFoundException;
+import brianpelinku.u5w2d4.payloads.NewAuthorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class AuthorService {
@@ -17,16 +20,19 @@ public class AuthorService {
     private AuthorRepository authorRepository;
 
     // salviamo un nuovo autore nel DB
-    public Author saveAuthor(Author body) {
+    public Author saveAuthor(NewAuthorDTO body) {
         // Faccio le verifiche prima di creare un nuovo record nel DB
         // 1. verifico l'email se non già utilizzata e se lo è BAD REQUEST 400
-        this.authorRepository.findByEmail(body.getEmail()).ifPresent(author -> {
-            throw new BadRequestException("L'email " + body.getEmail() + " è già in uso.");
+        this.authorRepository.findByEmail(body.email()).ifPresent(author -> {
+            throw new BadRequestException("L'email " + body.email() + " è già in uso.");
         });
         // 2. se tutto ok -> aggiungo campi creati dal server (server-generated)
-        body.setAvatar("https://ui-avatars.com/api/?name=" + body.getNome() + "+" + body.getCognome());
+
+        Author newAuthor = new Author(body.nome(), body.cognome(), body.email(), body.dataDiNascita(),
+                "https://ui-avatars.com/api/?name="+ body.nome() + "+" + body.cognome());
+//        body.setAvatar("https://ui-avatars.com/api/?name=" + body.nome() + "+" + body.cognome());
         // salvo il nuovo record
-        return this.authorRepository.save(body);
+        return this.authorRepository.save(newAuthor);
     }
 
     public Page<Author> findAll(int page, int size, String sortBy) {

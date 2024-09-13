@@ -26,7 +26,7 @@ public class BlogService {
         return blogRepository.findById(blogId).orElseThrow(() -> new NotFoundException(blogId));
     }
 
-    // 3. Post: /blogs
+    // 3. Post: /blogs + body
     public Blog saveBlog(NewBlogPayload blogBody) {
         Author author = authorService.findById(blogBody.getAuthorId());
         Blog newBlog = new Blog();

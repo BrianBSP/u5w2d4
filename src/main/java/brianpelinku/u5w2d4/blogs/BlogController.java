@@ -1,11 +1,16 @@
 package brianpelinku.u5w2d4.blogs;
 
+import brianpelinku.u5w2d4.exceptions.BadRequestException;
 import brianpelinku.u5w2d4.payloads.NewBlogPayload;
+import brianpelinku.u5w2d4.payloads.NewBlogRespDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * ------user crud-------
@@ -27,8 +32,17 @@ public class BlogController {
     // 3. Post: /blogs
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public Blog saveBlog(@RequestBody NewBlogPayload blog) {
-        return blogService.saveBlog(blog);
+    public NewBlogRespDTO saveBlog(@RequestBody @Validated NewBlogPayload blog, BindingResult validationResult) {
+        if (validationResult.hasErrors()){
+            String messages = validationResult
+                    .getAllErrors()
+                    .stream()
+                    .map(error -> error.getDefaultMessage())
+                    .collect(Collectors.joining(". "));
+          throw new BadRequestException("Si sono verificati errori nel payload. " + messages);
+        } else{
+            return new NewBlogRespDTO(this.blogService.saveBlog(blog).getId());
+        }
     }
 
     // 1. Get: /blogs --> findAll

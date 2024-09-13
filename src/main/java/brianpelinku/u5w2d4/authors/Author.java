@@ -22,4 +22,12 @@ public class Author {
     private String email;
     private LocalDate dataDiNascita;
     private String avatar;
+
+    public Author(String nome, String cognome, String email, LocalDate dataDiNascita, String avatar) {
+        this.nome = nome;
+        this.cognome = cognome;
+        this.email = email;
+        this.dataDiNascita = dataDiNascita;
+        this.avatar = avatar;
+    }
 }
